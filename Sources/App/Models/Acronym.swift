@@ -1,5 +1,5 @@
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 final class Acronym: Codable {
     
@@ -25,7 +25,8 @@ final class Acronym: Codable {
 // MARK: SQLiteModel implementation
 // Al implementar SQLiteModel, hacemos lo mismo que el codigo que esta arriba
 // En el caso que el ID del modelo sea de otro tipo tenemos SQLiteUUIDModel y SQLiteStringModel
-extension Acronym: SQLiteModel {}
+//extension Acronym: SQLiteModel {}
+extension Acronym: PostgreSQLModel {}
 
 extension Acronym: Migration {}
 
