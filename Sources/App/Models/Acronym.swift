@@ -27,8 +27,7 @@ final class Acronym: Codable {
 // En el caso que el ID del modelo sea de otro tipo tenemos SQLiteUUIDModel y SQLiteStringModel
 //extension Acronym: SQLiteModel {}
 extension Acronym: PostgreSQLModel {}
-
 extension Acronym: Migration {}
-
 extension Acronym: Content {}
+extension Acronym: Parameter {}
 
