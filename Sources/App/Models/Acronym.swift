@@ -6,12 +6,29 @@ final class Acronym: Codable {
     var id      :Int?
     var short   :String
     var long    :String
+    var userID  :User.ID
     
-    init(short:String, long:String) {
-        self.short = short
-        self.long  = long
+    init(short:String, long:String, userID: User.ID) {
+        self.short  = short
+        self.long   = long
+        self.userID = userID
     }
     
+}
+
+extension Acronym {
+    var user: Parent<Acronym, User> {
+        return parent(\.userID)
+    }
+}
+
+extension Acronym: Migration {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.reference(from: \.userID, to: \User.id)
+        }
+    }
 }
 
 //extension Acronym: Model {
@@ -27,7 +44,7 @@ final class Acronym: Codable {
 // En el caso que el ID del modelo sea de otro tipo tenemos SQLiteUUIDModel y SQLiteStringModel
 //extension Acronym: SQLiteModel {}
 extension Acronym: PostgreSQLModel {}
-extension Acronym: Migration {}
+
 extension Acronym: Content {}
 extension Acronym: Parameter {}
 

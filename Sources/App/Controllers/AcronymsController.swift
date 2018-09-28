@@ -13,14 +13,15 @@ struct AcronymsController: RouteCollection {
         let acronymsRoutes = router.grouped("api", "acronyms")
         
         // Registramos las 'routes'
-        acronymsRoutes.get(use: getAllHandler)
-        acronymsRoutes.post(use: createHandler)
-        acronymsRoutes.get(Acronym.parameter, use: getHandler)
-        acronymsRoutes.put(Acronym.parameter, use: updateHandler)
-        acronymsRoutes.delete(Acronym.parameter, use: deleteHandler)
-        acronymsRoutes.get("search", use: searchHandler)
-        acronymsRoutes.get("first", use: getFirstHandler)
-        acronymsRoutes.get("sorted", use: sortedHandler)
+        acronymsRoutes.get(use: getAllHandler)                              // GET request to '/api/acronyms/'
+        acronymsRoutes.post(use: createHandler)                             // POST request to '/api/acronyms'
+        acronymsRoutes.get(Acronym.parameter, use: getHandler)              // GET request to '/api/acronyms/<ACRONYM_ID>'
+        acronymsRoutes.put(Acronym.parameter, use: updateHandler)           // PUT request to '/api/acronyms/<ACRONYM_ID>'
+        acronymsRoutes.delete(Acronym.parameter, use: deleteHandler)        // DELETE request to '/api/acronyms/<ACRONYM_ID>'
+        acronymsRoutes.get("search", use: searchHandler)                    // GET request to '/api/acronyms/search'
+        acronymsRoutes.get("first", use: getFirstHandler)                   // GET request to '/api/acronyms/first'
+        acronymsRoutes.get("sorted", use: sortedHandler)                    // GET request to '/api/acronyms/sorted'
+        acronymsRoutes.get(Acronym.parameter, "user", use: getUserHandler)  // GET request to '/api/acronyms/<ACRONYM_ID>/user'
     }
     
     // Retrieve all Acronyms
@@ -34,7 +35,7 @@ struct AcronymsController: RouteCollection {
         return try req.content.decode(Acronym.self)
                               .flatMap(to: Acronym.self) { acronym in
                                 return acronym.save(on: req)
-        }
+                              }
     }
     
     // Retrieve a single Acronym
@@ -53,8 +54,9 @@ struct AcronymsController: RouteCollection {
             // 'updatedAcronym' es el objeto creado con los parametros enviados
             
             // actualizamos el acronym con los datos del nuevo
-            acronym.short = updatedAcronym.short
-            acronym.long  = updatedAcronym.long
+            acronym.short  = updatedAcronym.short
+            acronym.long   = updatedAcronym.long
+            acronym.userID = updatedAcronym.userID
             
             // guardamos el acronym actualizado y lo devolvemos en un Future<Acronym>
             return acronym.save(on: req)
@@ -92,7 +94,7 @@ struct AcronymsController: RouteCollection {
                         
                         guard let acronym = acronym else { throw Abort(.notFound) } // aseguramos que el 'acronym' exista, first() retorna un optional(?)
                         return acronym
-        }
+                      }
     }
     
     // Sorting Results
@@ -100,5 +102,13 @@ struct AcronymsController: RouteCollection {
         return Acronym.query(on: req)
                       .sort(\.short, .ascending)
                       .all()
+    }
+    
+    // Retrieve User
+    func getUserHandler(_ req: Request) throws -> Future<User> {
+        return try req.parameters.next(Acronym.self)
+                                 .flatMap(to: User.self) { acronym in
+                                    acronym.user.get(on: req)
+                                 }
     }
 }
